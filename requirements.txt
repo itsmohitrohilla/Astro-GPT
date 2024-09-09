@@ -4,5 +4,8 @@ pydantic
 requests
 geopy
 uvicorn
-transformer
+transformers
 torch
+accelerate
+sentencepiece
+protobuf

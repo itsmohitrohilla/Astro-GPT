@@ -2,3 +2,5 @@ venv
 .env
 test.db
 .DS_Store
+astro-gpt-model
+testcode

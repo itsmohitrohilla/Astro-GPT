@@ -17,3 +17,5 @@ class User(Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     timezone = Column(Float, default=5.5)
+    astro_data = Column(String)
+    

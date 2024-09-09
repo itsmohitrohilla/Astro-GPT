@@ -2,6 +2,9 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderQuotaExceeded, GeocoderServiceError
 import ssl
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import NoResultFound
 from geopy.exc import GeocoderTimedOut
 from app.models.user_model import User
 from app.schemas.user_schemas import UserCreate, UserUpdate
@@ -48,26 +51,47 @@ def parse_time(time_str: str):
 
 def create_user(db: Session, user: UserCreate):
     """Create a new user in the database."""
-    year, month, date = map(int, user.date_of_birth.split('-'))
-    hours, minutes, seconds = parse_time(user.time_of_birth)
-    latitude, longitude = get_lat_long(user.place_of_birth)
     
-    db_user = User(
-        name=user.name,
-        email=user.email,
-        year=year,
-        month=month,
-        date=date,
-        hours=hours,
-        minutes=minutes,
-        seconds=seconds,
-        latitude=latitude,
-        longitude=longitude
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    # Check if a user with the same email already exists
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
+        raise ValueError("A user with this email already exists.")
+    
+    try:
+        # Extract date, time, and location from user input
+        year, month, date = map(int, user.date_of_birth.split('-'))
+        hours, minutes, seconds = parse_time(user.time_of_birth)
+        latitude, longitude = get_lat_long(user.place_of_birth)
+        
+        # Create a new user instance
+        db_user = User(
+            name=user.name,
+            email=user.email,
+            year=year,
+            month=month,
+            date=date,
+            hours=hours,
+            minutes=minutes,
+            seconds=seconds,
+            latitude=latitude,
+            longitude=longitude
+        )
+        
+        # Add and commit the new user to the database
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        
+        return db_user
+
+    except IntegrityError as e:
+        # Handle database integrity errors (e.g., unique constraint violations)
+        db.rollback()  # Rollback the transaction on error
+        raise ValueError("An error occurred while creating the user: " + str(e))
+    except Exception as e:
+        # Handle any other exceptions
+        db.rollback()  # Rollback the transaction on error
+        raise RuntimeError("An unexpected error occurred: " + str(e))
 
 def update_user(db: Session, user_id: int, user: UserUpdate):
     """Update an existing user in the database."""
