@@ -4,3 +4,4 @@ test.db
 .DS_Store
 astro-gpt-model
 testcode
+__pycache__

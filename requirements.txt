@@ -9,3 +9,6 @@ torch
 accelerate
 sentencepiece
 protobuf
+fastapi-cache2[redis]
+aiocache
+redis-simple-cache

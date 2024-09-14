@@ -8,6 +8,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Astro-GPT")
 
+#api routes
 app.include_router(user_router.router, tags = ["Create Astro User"])
 app.include_router(astro_router, tags = ["Astro-GPT"])
 

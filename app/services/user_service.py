@@ -21,7 +21,7 @@ else:
 
 def get_lat_long(place_name):
     # Initialize Nominatim API with a user agent
-    geolocator = Nominatim(user_agent="geoapiExercises")
+    geolocator = Nominatim(user_agent="mrohilla165@gmail.com")
     
     try:
         # Get location
